@@ -1,0 +1,36 @@
+services:
+  agent:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./prompts:/app/prompts
+    env_file: .env
+    depends_on:
+      - mock-tools
+      - otel-collector
+    command: >
+      uvicorn src.agent:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      PLATFORM_REGISTRY_URL: http://mock-tools:8001
+
+  mock-tools:
+    image: python:3.12-slim
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./dev/mock_tools.py:/app/mock_tools.py
+    working_dir: /app
+    command: >
+      sh -c "pip install fastapi uvicorn --quiet &&
+             uvicorn mock_tools:app --host 0.0.0.0 --port 8001"
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./dev/otel-collector-config.yaml:/etc/otel-collector-config.yaml

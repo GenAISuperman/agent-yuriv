@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: "deploy-${{ github.repository }}"
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR login
+        run: az acr login --name acrshoppoc
+
+      - name: Docker build and push
+        run: |
+          IMAGE_TAG=${{ secrets.ACR_LOGIN_SERVER }}/agents/${{ secrets.AGENT_ID }}:${{ github.sha }}
+          LATEST_TAG=${{ secrets.ACR_LOGIN_SERVER }}/agents/${{ secrets.AGENT_ID }}:latest
+          docker build -t $IMAGE_TAG -t $LATEST_TAG .
+          docker push $IMAGE_TAG
+          docker push $LATEST_TAG
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group rg-shop-poc \
+            --name aks-shop-poc
+
+      - name: Replace placeholders in k8s manifests
+        run: |
+          find k8s/ -type f -name "*.yaml" | xargs sed -i \
+            -e "s|{{AGENT_ID}}|${{ secrets.AGENT_ID }}|g" \
+            -e "s|{{TEAM_NAME}}|${{ secrets.TEAM_NAME }}|g" \
+            -e "s|{{ACR_LOGIN_SERVER}}|${{ secrets.ACR_LOGIN_SERVER }}|g" \
+            -e "s|{{APIM_BASE_URL}}|${{ secrets.APIM_BASE_URL }}|g" \
+            -e "s|{{KEYVAULT_URL}}|${{ secrets.KEYVAULT_URL }}|g" \
+            -e "s|{{AZURE_OPENAI_ENDPOINT}}|${{ secrets.AZURE_OPENAI_ENDPOINT }}|g"
+
+      - name: Deploy to AKS
+        run: |
+          kubectl apply -f k8s/ -n "agents-${{ secrets.TEAM_NAME }}"

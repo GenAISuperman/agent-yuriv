@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{AGENT_ID}}"
+  namespace: "agents-{{TEAM_NAME}}"
+  labels:
+    app: "{{AGENT_ID}}"
+    team: "{{TEAM_NAME}}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{AGENT_ID}}"
+  template:
+    metadata:
+      labels:
+        app: "{{AGENT_ID}}"
+        team: "{{TEAM_NAME}}"
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: "sa-{{AGENT_ID}}"
+      containers:
+        - name: "{{AGENT_ID}}"
+          image: "{{ACR_LOGIN_SERVER}}/agents/{{AGENT_ID}}:latest"
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: "config-{{AGENT_ID}}"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5

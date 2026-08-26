@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "config-{{AGENT_ID}}"
+  namespace: "agents-{{TEAM_NAME}}"
+data:
+  AGENT_ID: "{{AGENT_ID}}"
+  TEAM_NAME: "{{TEAM_NAME}}"
+  PLATFORM_REGISTRY_URL: "{{APIM_BASE_URL}}"
+  KEYVAULT_URL: "{{KEYVAULT_URL}}"
+  AZURE_OPENAI_ENDPOINT: "{{AZURE_OPENAI_ENDPOINT}}"
+  AZURE_OPENAI_DEPLOYMENT: "gpt-4o"
+  OTEL_SERVICE_NAME: "{{AGENT_ID}}"

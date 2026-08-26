@@ -1,0 +1,32 @@
+agent:
+  id: "{{AGENT_ID}}"
+  team: "{{TEAM_NAME}}"
+  runtime: aks
+  interaction_model: "{{INTERACTION_MODEL}}"
+  guardrail_profile: "{{GUARDRAIL_PROFILE}}"
+
+identity:
+  sp_client_id: "{{SP_CLIENT_ID}}"
+  keyvault_url: "{{KEYVAULT_URL}}"
+
+tools: []
+
+evaluation:
+  suite: default-strict
+  ci_gate: true
+  pass_threshold: 0.95
+  datasets:
+    - id: golden-dataset
+      version: v1.0
+      source: repo
+      path: evals/datasets/golden-dataset.json
+
+output_policy:
+  violation_threshold: {{VIOLATION_THRESHOLD}}
+  window_minutes: {{WINDOW_MINUTES}}
+  action: {{OUTPUT_ACTION}}
+  notify_webhook: {{NOTIFY_WEBHOOK}}
+
+prompts:
+  active_version: v1.0
+  source: prompts/system.txt

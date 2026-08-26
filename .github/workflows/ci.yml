@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OPA
+        run: |
+          curl -L -o opa-bin \
+            https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa-bin
+          sudo mv opa-bin /usr/local/bin/opa
+
+      - name: Validate agent.yaml with OPA
+        run: |
+          DENY=$(opa eval \
+            --data opa/agent-policy.rego \
+            --input agent.yaml \
+            --format raw \
+            "data.agent.policy.deny")
+          echo "OPA deny results: $DENY"
+          if [ "$DENY" != "[]" ]; then
+            echo "OPA policy check failed"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run Promptfoo eval
+        run: |
+          npx promptfoo@latest eval \
+            --config evals/promptfooconfig.yaml \
+            --no-cache \
+            --output evals/results.json
+        env:
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
+          AZURE_OPENAI_API_HOST: "{{AZURE_OPENAI_HOST}}"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Docker build
+        run: docker build -t agent-ci-test .

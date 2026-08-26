@@ -1,0 +1,43 @@
+# Deny all ingress and egress by default
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: "deny-all-{{AGENT_ID}}"
+  namespace: "agents-{{TEAM_NAME}}"
+spec:
+  podSelector:
+    matchLabels:
+      app: "{{AGENT_ID}}"
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Allow platform traffic only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: "allow-platform-{{AGENT_ID}}"
+  namespace: "agents-{{TEAM_NAME}}"
+spec:
+  podSelector:
+    matchLabels:
+      app: "{{AGENT_ID}}"
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: apim
+  egress:
+    # HTTPS — APIM (tool calls + registry), Key Vault, ACR, Azure OpenAI
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # DNS — required for name resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
