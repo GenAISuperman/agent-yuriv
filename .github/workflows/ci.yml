@@ -49,7 +49,7 @@ jobs:
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
           AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
-          AZURE_OPENAI_API_HOST: "{{AZURE_OPENAI_HOST}}"
+          AZURE_OPENAI_API_HOST: "oai-agenticdemo-poc.openai.azure.com"
 
       - name: Setup Python
         uses: actions/setup-python@v5
