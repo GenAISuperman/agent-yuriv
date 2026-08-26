@@ -1,13 +1,13 @@
 agent:
-  id: "{{AGENT_ID}}"
-  team: "{{TEAM_NAME}}"
+  id: "yuriv"
+  team: "team"
   runtime: aks
-  interaction_model: "{{INTERACTION_MODEL}}"
-  guardrail_profile: "{{GUARDRAIL_PROFILE}}"
+  interaction_model: "standalone"
+  guardrail_profile: "strict"
 
 identity:
-  sp_client_id: "{{SP_CLIENT_ID}}"
-  keyvault_url: "{{KEYVAULT_URL}}"
+  sp_client_id: "91dc80df-ac30-44ca-a2b0-b2189fbc05e0"
+  keyvault_url: "https://kv-agenticdemo-poc.vault.azure.net/"
 
 tools: []
 
@@ -22,10 +22,10 @@ evaluation:
       path: evals/datasets/golden-dataset.json
 
 output_policy:
-  violation_threshold: {{VIOLATION_THRESHOLD}}
-  window_minutes: {{WINDOW_MINUTES}}
-  action: {{OUTPUT_ACTION}}
-  notify_webhook: {{NOTIFY_WEBHOOK}}
+  violation_threshold: 5
+  window_minutes: 1
+  action: block
+  notify_webhook: 
 
 prompts:
   active_version: v1.0
