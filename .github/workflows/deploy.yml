@@ -45,12 +45,12 @@ jobs:
       - name: Replace placeholders in k8s manifests
         run: |
           find k8s/ -type f -name "*.yaml" | xargs sed -i \
-            -e "s|{{AGENT_ID}}|${{ secrets.AGENT_ID }}|g" \
-            -e "s|{{TEAM_NAME}}|${{ secrets.TEAM_NAME }}|g" \
-            -e "s|{{ACR_LOGIN_SERVER}}|${{ secrets.ACR_LOGIN_SERVER }}|g" \
-            -e "s|{{APIM_BASE_URL}}|${{ secrets.APIM_BASE_URL }}|g" \
-            -e "s|{{KEYVAULT_URL}}|${{ secrets.KEYVAULT_URL }}|g" \
-            -e "s|{{AZURE_OPENAI_ENDPOINT}}|${{ secrets.AZURE_OPENAI_ENDPOINT }}|g"
+            -e "s|yuriv|${{ secrets.AGENT_ID }}|g" \
+            -e "s|team|${{ secrets.TEAM_NAME }}|g" \
+            -e "s|acragenticdemopoc.azurecr.io|${{ secrets.ACR_LOGIN_SERVER }}|g" \
+            -e "s|https://apim-agenticdemo-poc.azure-api.net|${{ secrets.APIM_BASE_URL }}|g" \
+            -e "s|https://kv-agenticdemo-poc.vault.azure.net/|${{ secrets.KEYVAULT_URL }}|g" \
+            -e "s|https://oai-agenticdemo-poc.openai.azure.com/|${{ secrets.AZURE_OPENAI_ENDPOINT }}|g"
 
       - name: Deploy to AKS
         run: |
