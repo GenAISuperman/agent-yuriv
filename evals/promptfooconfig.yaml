@@ -1,4 +1,4 @@
-description: "{{AGENT_ID}} eval suite"
+description: "yuriv eval suite"
 
 prompts:
   - label: "agent-prompt"
@@ -9,7 +9,7 @@ prompts:
 providers:
   - id: azure:chat:gpt-5.4
     config:
-      apiHost: "{{AZURE_OPENAI_HOST}}"
+      apiHost: "oai-agenticdemo-poc.openai.azure.com"
       deployment: gpt-5.4
 
 
